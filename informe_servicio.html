@@ -1,0 +1,167 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Informe de Servicio Técnico</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    h2 {
+      color: #007BFF;
+    }
+    label {
+      font-weight: bold;
+      margin-top: 10px;
+      display: block;
+    }
+    input, textarea {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      box-sizing: border-box;
+    }
+    .checkbox-group label {
+      font-weight: normal;
+      display: block;
+    }
+    #firmaCanvas {
+      border: 1px solid #000;
+      width: 100%;
+      height: 150px;
+      touch-action: none;
+    }
+    button {
+      margin-top: 20px;
+      width: 100%;
+      padding: 10px;
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="formulario">
+    <h2>Informe de Servicio Técnico</h2>
+
+    <label>Fecha</label>
+    <input type="date" id="fecha">
+
+    <label>Hora de inicio</label>
+    <input type="time" id="hora_inicio">
+
+    <label>Hora de término</label>
+    <input type="time" id="hora_termino">
+
+    <label>Técnico</label>
+    <input type="text" id="tecnico">
+
+    <label>Cliente</label>
+    <input type="text" id="cliente">
+
+    <label>Problema reportado</label>
+    <textarea id="problema"></textarea>
+
+    <label>Actividades realizadas</label>
+    <div class="checkbox-group">
+      <label><input type="checkbox" value="Diagnóstico"> Diagnóstico</label>
+      <label><input type="checkbox" value="Mantenimiento"> Mantenimiento</label>
+      <label><input type="checkbox" value="Reparación"> Reparación</label>
+      <label><input type="checkbox" value="Instalación"> Instalación</label>
+    </div>
+
+    <label>Trabajo realizado</label>
+    <textarea id="trabajo"></textarea>
+
+    <label>Firma del técnico (dibujar con el dedo)</label>
+    <canvas id="firmaCanvas"></canvas>
+    <button onclick="limpiarFirma()">Limpiar firma</button>
+
+    <button onclick="generarPDF()">Guardar como PDF</button>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script>
+    const canvas = document.getElementById("firmaCanvas");
+    const ctx = canvas.getContext("2d");
+    let dibujando = false;
+
+    function getPos(e) {
+      const rect = canvas.getBoundingClientRect();
+      return {
+        x: (e.touches ? e.touches[0].clientX : e.clientX) - rect.left,
+        y: (e.touches ? e.touches[0].clientY : e.clientY) - rect.top
+      };
+    }
+
+    function empezarDibujo(e) {
+      dibujando = true;
+      const pos = getPos(e);
+      ctx.beginPath();
+      ctx.moveTo(pos.x, pos.y);
+    }
+
+    function dibujar(e) {
+      if (!dibujando) return;
+      e.preventDefault();
+      const pos = getPos(e);
+      ctx.lineTo(pos.x, pos.y);
+      ctx.stroke();
+    }
+
+    function terminarDibujo() {
+      dibujando = false;
+    }
+
+    canvas.addEventListener("mousedown", empezarDibujo);
+    canvas.addEventListener("mousemove", dibujar);
+    canvas.addEventListener("mouseup", terminarDibujo);
+    canvas.addEventListener("touchstart", empezarDibujo);
+    canvas.addEventListener("touchmove", dibujar);
+    canvas.addEventListener("touchend", terminarDibujo);
+
+    function limpiarFirma() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    async function generarPDF() {
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF();
+
+      const canvasFirma = document.getElementById("firmaCanvas");
+      const firmaImg = canvasFirma.toDataURL("image/png");
+
+      const formData = `
+Fecha: ${document.getElementById("fecha").value}
+Hora inicio: ${document.getElementById("hora_inicio").value}
+Hora término: ${document.getElementById("hora_termino").value}
+Técnico: ${document.getElementById("tecnico").value}
+Cliente: ${document.getElementById("cliente").value}
+
+Problema reportado:
+${document.getElementById("problema").value}
+
+Actividades:
+${[...document.querySelectorAll('input[type="checkbox"]:checked')].map(cb => cb.value).join(", ")}
+
+Trabajo realizado:
+${document.getElementById("trabajo").value}
+`;
+
+      pdf.setFontSize(12);
+      const lines = pdf.splitTextToSize(formData, 180);
+      pdf.text(lines, 15, 20);
+      pdf.text("Firma del técnico:", 15, 140);
+      pdf.addImage(firmaImg, 'PNG', 15, 150, 80, 40);
+      pdf.save("informe_servicio.pdf");
+    }
+  </script>
+</body>
+</html>

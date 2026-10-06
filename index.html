@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Control de pagos · Gimnasio</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#eef1f6;--card:#fff;--ink:#14213d;--mute:#5d6a85;--line:#d8dee9;--acc:#2d5bff;--ok:#12805c;--okbg:#dcf3ea;--warn:#b4440f;--warnbg:#fde8dc;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1626;--card:#18223a;--ink:#eaf0ff;--mute:#9aa8c7;--line:#2a3757;--acc:#6f8cff;--ok:#5fd3a6;--okbg:#14382d;--warn:#ff9a6b;--warnbg:#3d2316}}
+:root[data-theme="dark"]{--bg:#0f1626;--card:#18223a;--ink:#eaf0ff;--mute:#9aa8c7;--line:#2a3757;--acc:#6f8cff;--ok:#5fd3a6;--okbg:#14382d;--warn:#ff9a6b;--warnbg:#3d2316}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 Barlow,system-ui,sans-serif}
+main{max-width:720px;margin:0 auto;padding:20px 16px 48px}
+h1,h2{font-family:"Barlow Condensed",Impact,sans-serif;margin:0;letter-spacing:.01em}
+h1{font-size:2.2rem;line-height:1}
+h2{font-size:1.4rem;margin-bottom:12px}
+.sub{color:var(--mute);margin:4px 0 20px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:16px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.full{grid-column:1/-1}
+label,.lb{display:block;font-size:.85rem;font-weight:600;color:var(--mute);margin-bottom:4px}
+input{width:100%;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:11px 12px}
+input:focus,button:focus-visible{outline:2px solid var(--acc);outline-offset:1px}
+.days{display:flex;gap:6px}
+.days button{flex:1;padding:10px 0;background:var(--bg);color:var(--ink);border:1px solid var(--line);font-weight:600}
+.days button.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+.calc{background:var(--bg);border:1px dashed var(--line);border-radius:12px;padding:10px 14px;color:var(--mute);font-size:.92rem}
+.calc b{color:var(--ink)}
+.total{background:var(--ink);color:var(--bg);border-radius:12px;padding:12px 14px;display:flex;justify-content:space-between;align-items:baseline}
+.total b{font:700 2rem/1 "Barlow Condensed",Impact,sans-serif}
+button{font:inherit;font-weight:600;border:0;border-radius:10px;padding:12px 16px;cursor:pointer;background:var(--acc);color:#fff;width:100%}
+button.ghost{background:transparent;color:var(--mute);border:1px solid var(--line);width:auto;padding:7px 10px;font-size:.85rem}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.stat span{font-size:.78rem;color:var(--mute);display:block}
+.stat b{font:700 1.4rem/1.2 "Barlow Condensed",Impact,sans-serif}
+.stat.ok b{color:var(--ok)}.stat.pen b{color:var(--warn)}
+.row{display:flex;gap:10px;align-items:center;justify-content:space-between;padding:12px 0;border-top:1px solid var(--line)}
+.row:first-of-type{border-top:0}
+.row .n{font-weight:600}.row .d{color:var(--mute);font-size:.88rem}
+.right{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.amt{font:700 1.3rem/1 "Barlow Condensed",Impact,sans-serif}
+.pill{border:0;border-radius:99px;padding:5px 12px;font-size:.82rem;width:auto}
+.pill.p{background:var(--okbg);color:var(--ok)}.pill.n{background:var(--warnbg);color:var(--warn)}
+.empty{color:var(--mute);text-align:center;padding:20px 0}
+.bar{margin-bottom:12px}
+</style>
+</head>
+<body>
+<main>
+<h1>Control de pagos</h1>
+<p class="sub">Elige los días que va cada alumno y el sistema cuenta las clases reales del mes.</p>
+
+<section class="card">
+<h2>Nuevo registro</h2>
+<div class="grid">
+<div class="full"><label for="cli">Cliente</label><input id="cli" placeholder="Nombre del alumno" autocomplete="off"></div>
+<div><label for="val">Valor de la clase</label><input id="val" type="number" inputmode="decimal" min="0" placeholder="0"></div>
+<div><label for="mes">Mes</label><input id="mes" type="month"></div>
+<div class="full"><span class="lb">Días que asiste por semana</span><div class="days" id="days"></div></div>
+<div class="full calc" id="calc">Elige al menos un día.</div>
+<div class="full total"><span>Total a pagar</span><b id="tot">$0</b></div>
+<div class="full"><button id="add">Guardar alumno</button></div>
+</div>
+</section>
+
+<section>
+<div class="bar"><label for="fmes">Ver mes</label><input id="fmes" type="month"></div>
+<div class="stats">
+<div class="stat"><span>Total del mes</span><b id="sT">$0</b></div>
+<div class="stat ok"><span>Cobrado</span><b id="sP">$0</b></div>
+<div class="stat pen"><span>Pendiente</span><b id="sN">$0</b></div>
+</div>
+<div class="card"><div id="list"></div></div>
+</section>
+</main>
+
+<script>
+(function(){
+var KEY="gym-pagos-v2",data=[],sel=[];
+var NAMES=["Dom","Lun","Mar","Mié","Jue","Vie","Sáb"],ORDER=[1,2,3,4,5,6,0];
+var $=function(i){return document.getElementById(i)};
+var fmt=function(n){return "$"+Math.round(n).toLocaleString("es")};
+function load(){try{data=JSON.parse(localStorage.getItem(KEY))||[]}catch(e){data=[]}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(data))}catch(e){}}
+// cuenta cuántas veces cae cada día de la semana en el mes
+function count(mes,days){
+  var p=mes.split("-"),y=+p[0],mo=+p[1]-1,n=new Date(y,mo+1,0).getDate(),per={},tot=0;
+  days.forEach(function(d){per[d]=0});
+  for(var i=1;i<=n;i++){var w=new Date(y,mo,i).getDay();if(per[w]!==undefined){per[w]++;tot++}}
+  return {tot:tot,per:per};
+}
+var now=new Date(),m=now.getFullYear()+"-"+String(now.getMonth()+1).padStart(2,"0");
+$("mes").value=m;$("fmes").value=m;
+ORDER.forEach(function(d){var b=document.createElement("button");b.type="button";b.textContent=NAMES[d];b.setAttribute("aria-pressed","false");
+  b.onclick=function(){var i=sel.indexOf(d);if(i<0)sel.push(d);else sel.splice(i,1);b.className=i<0?"on":"";b.setAttribute("aria-pressed",i<0);calc()};
+  $("days").appendChild(b)});
+function calc(){
+  if(!sel.length||!$("mes").value){$("calc").textContent="Elige al menos un día.";$("tot").textContent="$0";return}
+  var c=count($("mes").value,sel),sorted=ORDER.filter(function(d){return sel.indexOf(d)>=0});
+  $("calc").innerHTML=sorted.map(function(d){return NAMES[d]+" ×"+c.per[d]}).join(", ")+" = <b>"+c.tot+" clases</b> en el mes";
+  $("tot").textContent=fmt((+$("val").value||0)*c.tot);
+}
+$("val").oninput=calc;$("mes").onchange=calc;
+$("add").onclick=function(){
+  var n=$("cli").value.trim(),v=+$("val").value;
+  if(!n||!(v>0)||!sel.length){alert("Completa cliente, valor de la clase y al menos un día de asistencia.");return}
+  data.push({id:Date.now(),n:n,v:v,d:sel.slice(),m:$("mes").value||m,paid:false});
+  save();$("fmes").value=$("mes").value;
+  $("cli").value="";$("val").value="";sel=[];[].forEach.call($("days").children,function(b){b.className=""});calc();render();
+};
+function render(){
+  var f=$("fmes").value,rows=data.filter(function(r){return r.m===f}),T=0,P=0,h="";
+  rows.forEach(function(r){var c=count(r.m,r.d),t=r.v*c.tot;T+=t;if(r.paid)P+=t;
+    var dn=ORDER.filter(function(d){return r.d.indexOf(d)>=0}).map(function(d){return NAMES[d]}).join("-");
+    h+='<div class="row"><div><div class="n"></div><div class="d">'+dn+' · '+c.tot+' clases × '+fmt(r.v)+'</div></div><div class="right"><span class="amt">'+fmt(t)+'</span><div><button class="pill '+(r.paid?'p':'n')+'" data-t="'+r.id+'">'+(r.paid?'Pagado':'Pendiente')+'</button> <button class="ghost" data-d="'+r.id+'">Borrar</button></div></div></div>';
+  });
+  $("list").innerHTML=h||'<div class="empty">No hay alumnos en este mes. Agrega el primero arriba.</div>';
+  var ns=$("list").querySelectorAll(".n");rows.forEach(function(r,i){ns[i].textContent=r.n});
+  $("sT").textContent=fmt(T);$("sP").textContent=fmt(P);$("sN").textContent=fmt(T-P);
+}
+$("fmes").onchange=render;
+$("list").onclick=function(e){
+  var t=e.target.getAttribute("data-t"),d=e.target.getAttribute("data-d");
+  if(t){data.forEach(function(r){if(r.id==t)r.paid=!r.paid});save();render()}
+  if(d&&confirm("¿Borrar este registro?")){data=data.filter(function(r){return r.id!=d});save();render()}
+};
+load();calc();render();
+})();
+</script>
+</body>
+</html>

@@ -3,13 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Control de pagos · Gimnasio</title>
+<meta name="theme-color" content="#0a0905">
+<link rel="icon" href="logo.jpg">
+<link rel="apple-touch-icon" href="logo.jpg">
+<title>Templo Gym · Control de pagos</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#eef1f6;--card:#fff;--ink:#14213d;--mute:#5d6a85;--line:#d8dee9;--acc:#2d5bff;--ok:#12805c;--okbg:#dcf3ea;--warn:#b4440f;--warnbg:#fde8dc;
+:root{--bg:#0a0905;--card:#16130e;--ink:#f3e8d6;--mute:#a8987f;--line:#33291b;--acc:#c9822f;--on:#0a0905;--ok:#6fd3a0;--okbg:#12301f;--warn:#ff9f5a;--warnbg:#3a2210;
 box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1626;--card:#18223a;--ink:#eaf0ff;--mute:#9aa8c7;--line:#2a3757;--acc:#6f8cff;--ok:#5fd3a6;--okbg:#14382d;--warn:#ff9a6b;--warnbg:#3d2316}}
-:root[data-theme="dark"]{--bg:#0f1626;--card:#18223a;--ink:#eaf0ff;--mute:#9aa8c7;--line:#2a3757;--acc:#6f8cff;--ok:#5fd3a6;--okbg:#14382d;--warn:#ff9a6b;--warnbg:#3d2316}
 *{box-sizing:border-box}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
 body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 Barlow,system-ui,sans-serif}
@@ -47,10 +48,22 @@ button.ghost{background:transparent;color:var(--mute);border:1px solid var(--lin
 .pill.p{background:var(--okbg);color:var(--ok)}.pill.n{background:var(--warnbg);color:var(--warn)}
 .empty{color:var(--mute);text-align:center;padding:20px 0}
 .bar{margin-bottom:12px}
+
+h1{font-size:2rem;text-align:center}.sub{text-align:center}
+.logo{display:block;width:170px;max-width:60%;height:auto;margin:0 auto 4px}
+main{padding-top:12px}
+input{color-scheme:dark}
+button{color:var(--on);font-weight:700}
+.days button{color:var(--ink);font-weight:600}.days button.on{color:var(--on)}
+button.ghost{color:var(--mute);font-weight:600}
+.pill{font-weight:600}.pill.p{color:var(--ok)}.pill.n{color:var(--warn)}
+.calc b{color:var(--acc)}
+.total{background:var(--acc);color:var(--on);font-weight:600}
 </style>
 </head>
 <body>
 <main>
+<img class="logo" src="logo.jpg" alt="Templo Gym">
 <h1>Control de pagos</h1>
 <p class="sub">Elige los días que va cada alumno y el sistema cuenta las clases reales del mes.</p>
 
